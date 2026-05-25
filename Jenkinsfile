@@ -1,28 +1,26 @@
 pipeline {
-    agent none // Do not allocate a global agent; define it per stage or block
+    agent none
 
     stages {
         stage('Build & Test') {
             agent {
                 docker {
-                    // This creates a separate worker container for this stage
-                    image 'maven:3.9.6-eclipse-temurin-17'
-                    // Reuses maven local repository cache on the host so builds stay fast
-                    args '-v $HOME/.m2:/root/.m2'
+                    // Uses JDK 17 with Gradle
+                    image 'gradle:8.6.0-jdk17'
+                    // Caches Gradle dependencies on the host machine for faster builds
+                    args '-v $HOME/.gradle:/home/gradle/.gradle'
                 }
             }
             steps {
-                echo 'Checking out code...'
-                // Code is automatically checked out into the worker container workspace
-
-                echo 'Building Spring Boot Application...'
-                sh 'mvn clean package -DskipTests=false'
+                echo 'Building Spring Boot Application with Gradle...'
+                // Uses the gradle command inside the isolated container
+                sh 'gradle clean build -x test'
             }
             post {
                 success {
                     echo 'Build completed successfully!'
-                    // Optional: Archive the generated jar file
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                    // Spring Boot Gradle plugin puts jars in build/libs/
+                    archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
                 }
             }
         }
