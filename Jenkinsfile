@@ -8,7 +8,7 @@ pipeline {
                     // UPDATED: Upgraded to Gradle 8.14 and JDK 21
                     image 'gradle:8.14-jdk21'
                     // Keeps the Mac-friendly cache path we configured earlier
-                    args '-v ${WORKSPACE}/.gradle-cache:/home/gradle/.gradle --name spring-build-worker-${env.BUILD_NUMBER}'
+                    args "--name spring-build-worker-${env.BUILD_NUMBER} -v ${WORKSPACE}/.gradle-cache:/home/gradle/.gradle"
                 }
             }
             steps {
