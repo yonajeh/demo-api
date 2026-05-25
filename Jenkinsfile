@@ -5,14 +5,13 @@ pipeline {
         stage('Build & Test') {
             agent {
                 docker {
-                    // UPDATED: Upgraded to Gradle 8.14 and JDK 21
                     image 'gradle:8.14-jdk21'
-                    // Keeps the Mac-friendly cache path we configured earlier
-                    args "--name spring-build-worker-${env.BUILD_NUMBER} -v ${WORKSPACE}/.gradle-cache:/home/gradle/.gradle"
+                    // FIXED: Explicitly used env.WORKSPACE so Groovy reads it from the environment
+                    args "--name spring-build-worker-${env.BUILD_NUMBER} -v ${env.WORKSPACE}/.gradle-cache:/home/gradle/.gradle"
                 }
             }
             steps {
-                echo 'Building Spring Boot (Java 21) Application with Gradle...'
+                echo "Building Spring Boot (Java 21) Application with Gradle inside spring-build-worker-${env.BUILD_NUMBER}..."
                 sh 'gradle clean build -x test'
             }
             post {
